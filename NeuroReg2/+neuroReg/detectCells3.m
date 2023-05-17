@@ -72,7 +72,7 @@ stepX = mean(diff(data.x));
 stepY = mean(diff(data.y));
 stepZ = mean(diff(data.z));
 SizeLimitPx = SizeLimit/stepX/stepY/stepZ;
-v = data.value / max(data.value(:));
+v = data.value/ max(data.value(:));
 NullIndx = v==0;
 v(NullIndx) = mean(v(:))*ones(length(v(NullIndx)),1);
 

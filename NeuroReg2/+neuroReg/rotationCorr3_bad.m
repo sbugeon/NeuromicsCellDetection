@@ -164,8 +164,7 @@ for i = 1:n_gamma
             % M: the transform from Volume coordinate system to Slice
             % coordinate sytem.
             value_temp_bw = value_temp;           
-            value_temp_bw(value_temp<0.5*max(value_temp(:))) = 0;
-            value_temp_bw(value_temp<0.5*max(value_temp(:))) = 0;
+            value_temp_bw(value_temp<0.8*max(value_temp(:))) = 0;
             
             CC = bwconncomp(value_temp_bw);
             PeakNum = CC.NumObjects;

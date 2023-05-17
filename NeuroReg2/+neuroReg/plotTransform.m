@@ -39,6 +39,10 @@ clf(h);
 %% Plot the slice from volume
 subplot(2,4,3);
 [data_cut1,b_plane,~] = neuroReg.cutVolume(dataZ,data_slice,M,Integ);
+data_cut1.value = data_cut1.value - min(data_cut1.value(:));
+data_cut1.value = data_cut1.value/(max(data_cut1.value(:))/65000);
+data_cut1.value = double(imadjust(uint16(data_cut1.value),[0 0.4]));
+% imshow(data_cut1.value)
 neuroReg.plotData2(data_cut1);
 title(['Cut from Volume, Thickness =',num2str(Integ),'um']);
 %% Plot detected cells

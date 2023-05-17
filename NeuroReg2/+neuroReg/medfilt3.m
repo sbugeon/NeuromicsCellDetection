@@ -12,7 +12,7 @@ MedianFilterSize = Option.MedianFilterSize;
 MedianFilterSizePx = ceil(MedianFilterSize./[stepX,stepY,stepZ]);
 MedianFilterSizePx = floor(MedianFilterSizePx/2)*2+1;
 v = data.value / max(data.value(:));
-
+% v = data.value;
 tic;
 fprintf('Applying median filter...\n');
 v = medfilt3(v,MedianFilterSizePx);

@@ -1,4 +1,9 @@
-function [data_out,b_plane,b_list_volume] = cutVolume(data,cut_grid,M,d,Full)
+function [data_out,b_plane,b_list_volume] = cutVolume(data,cut_grid,M,d,MeanSub,Full)
+
+if nargin<5
+    MeanSub = 1;
+    Full=0;
+end
 % cutVolume cut a slice from the data.
 % data_out.x, data_out.y, data_out.value is the output slice.
 % b_list is the boundary polygon (5-by-2) in the plane coordination
@@ -64,7 +69,9 @@ elseif nargin>=4 % Integration enable
     for i = 1:num_slice
         v_mat_this = v_mat(:,:,i);
         nf = isnan(v_mat_this); % nf: is NaN
+        if MeanSub
         v_mat_this = v_mat_this - mean(v_mat_this(~nf));
+        end
         if i~=round(d/2/stepSlice)+1
             % Middle slice is the mask with nan
             v_mat_this(nf)=0;
@@ -75,14 +82,14 @@ elseif nargin>=4 % Integration enable
     v_sum = sum(v_mat,3);
     data_out.value = v_sum;
     % Crop the image
-    if nargin==4
+    if ~Full
         [data_out,xb,zb] = cropNaN(data_out);
         xb_list = [xb(1),xb(1),xb(2),xb(2),xb(1)];
         yb_list = [0,0,0,0,0];
         zb_list = [zb(1),zb(2),zb(2),zb(1),zb(1)];
         b_plane = [xb_list;zb_list];
         b_list_volume = M * [xb_list;yb_list;zb_list;ones(size(xb_list))];
-    elseif Full == 1
+    else
         xb_list = [0,0,0,0,0];
         yb_list = [0,0,0,0,0];
         zb_list = [0,0,0,0,0];

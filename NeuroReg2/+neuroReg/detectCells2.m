@@ -119,10 +119,12 @@ hold off;
 end
 function plotSlice(data)
 % plotSlice(data) visualize a 2-D data set
-pcolor(data.x,data.y,data.value');
+imagesc(data.x,data.y,data.value');
+colormap(gray)
 axis equal;
 axis tight;
 shading flat;
+set(gca,'Ydir','normal')
 end
 function data_out = downSample(data,stepX,stepY,stepZ)
 % downSample put data into a new grid

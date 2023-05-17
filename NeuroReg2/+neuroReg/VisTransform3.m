@@ -24,7 +24,7 @@ classdef VisTransform3 < handle
     end
     methods
         function obj = VisTransform3(TransTable,DataSets,pt_list_vol,...
-                pt_list_slice,ex_list,Option,filepath)
+                pt_list_slice,ex_list,Option,filepath,fileName)
             obj.Data.TransTable = TransTable;
             obj.Data.TransTableNow = obj.Data.TransTable(1,:);
             obj.Data.pt_list_vol = pt_list_vol;
@@ -33,10 +33,12 @@ classdef VisTransform3 < handle
             obj.Data.DataSets = DataSets;
             obj.Option = neuroReg.setOption(Option);
             data_slice = obj.Data.DataSets.data_slice;
+            data_slice.value=data_slice.value;
             obj.Data.DataSets.data_slice_low = ...
                 neuroReg.downSample(data_slice,4,[],4);
             % obj.Data.DataSets.data_slice_low = data_slice;
             obj.Gui.Path = filepath;
+            obj.Gui.FN = fileName;
             constructFigure(obj);
             uiwait;%%%SB
         end
@@ -219,18 +221,19 @@ classdef VisTransform3 < handle
 %                     M = M_icp_s2v ; %  M: slice to volume. Default.
                     M1 = M_icp_v2s; % Volume to Slice
                 end
+%                 M2 = [M1;[0 0 0 1]]*[eye(3),obj.Data.T0';[0 0 0 1]];
+%                 M1 = M2(1:3,:);
                 
-                % Today it is optimized by SB
-                I = neuroReg.findCutStack(dataZ,data_slice,M1);
-                xv = I.vert(:,1);
-                yv = I.vert(:,2);
-                k = boundary(xv,yv,0.001);
+%                 I = neuroReg.findCutStack(dataZ,data_slice,M1);
+%                 xv = I.vert(:,1);
+%                 yv = I.vert(:,2);
+%                 k = boundary(xv,yv,0.001);
                 
-                Xlim1 = min(xv);
-                Xlim2 = max(xv);
-                Ylim1 = min(yv);
-                Ylim2 = max(yv);
-                
+%                 Xlim1 = min(xv);
+%                 Xlim2 = max(xv);
+%                 Ylim1 = min(yv);
+%                 Ylim2 = max(yv);
+%                 
                 %% Plot: Axis 1
                 figure(obj.Gui.FigNum1)
                 h1 = subplot(1,2,1);
@@ -252,9 +255,10 @@ classdef VisTransform3 < handle
                 %% Plot: Axis 2
                 figure(obj.Gui.FigNum1)
                 h2 = subplot(1,2,2);
-                xs_full = pt_list_slice(1,:);
-                ys_full = pt_list_slice(2,:);
-                pt_list_slice_now = pt_list_slice(:,inpolygon(xs_full,ys_full,xv(k),yv(k)));
+%                 xs_full = pt_list_slice(1,:);
+%                 ys_full = pt_list_slice(2,:);
+%                 pt_list_slice_now = pt_list_slice(:,inpolygon(xs_full,ys_full,xv(k),yv(k)));
+                pt_list_slice_now = pt_list_slice;
                 pt_list_vol_rotated = M1*[pt_list_vol;ones(size(pt_list_vol(1,:)))];
                 pf = abs(pt_list_vol_rotated(2,:))<Integ;
                 pt_list_vol_now = pt_list_vol_rotated(:,pf);
@@ -263,6 +267,10 @@ classdef VisTransform3 < handle
                 xv = pt_list_vol_now(1,:);
                 yv = pt_list_vol_now(3,:);
                 dv = pt_list_vol_now(2,:);
+                Xlim1 = min(xv)-20;
+                Xlim2 = max(xv)+20;
+                Ylim1 = min(yv)-20;
+                Ylim2 = max(yv)+20;
                 pt_now_area = ones(1,sum(pf==1)).*exp(-(dv/CellRadius).^2/2);
                 hold(h2,'off');
                 scatter(h2,xs,ys,72,'k+');
@@ -357,7 +365,7 @@ classdef VisTransform3 < handle
             %             obj.Data.TransTable(N+1,:) = obj.Data.TransTableNow;  %%%SB
             set(obj.Gui.TotNum,'String',['/ ',num2str(1)]);
             set(obj.Gui.EditTableNum,'String',num2str(1));
-            filepathname = fullfile(obj.Gui.Path,'Match_found.mat');
+            filepathname = fullfile(obj.Gui.Path,obj.Gui.FN);
             TransTable = obj.Data.TransTableNow;
             if exist(filepathname, 'file') == 2
                 delete(filepathname)
@@ -370,7 +378,7 @@ classdef VisTransform3 < handle
             
             set(obj.Gui.TotNum,'String',['/ ',num2str(1)]); %%%SB
             set(obj.Gui.EditTableNum,'String',num2str(1));%%%SB
-            filepathname = fullfile(obj.Gui.Path,'Match_found.mat');%%%SB
+            filepathname = fullfile(obj.Gui.Path, obj.Gui.FN);%%%SB
             TransTable = [];%%%SB
             if exist(filepathname, 'file') == 2%%%SB
                 delete(filepathname)%%%SB

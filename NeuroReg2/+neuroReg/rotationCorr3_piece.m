@@ -1,4 +1,4 @@
-function TransTable = rotationCorr3(pt_list_slice,pt_area_slice,pt_list_vol,data_slice,AngleRange,Option,X,Y)
+function TransTable = rotationCorr3_piece(pt_list_slice,pt_area_slice,pt_list_vol,data_slice,AngleRange,Option,X,Y)
 % rotationCorr3 returns the transformation parameters and the corresponding
 % correlation functions.
 % TransTable = ...
@@ -163,9 +163,12 @@ for i = 1:n_gamma
             % x_c: coordiniation before transformation (Volume coordination)
             % M: the transform from Volume coordinate system to Slice
             % coordinate sytem.
-            value_temp_bw = value_temp;           
-            value_temp_bw(value_temp<0.5*max(value_temp(:))) = 0;
-            value_temp_bw(value_temp<0.5*max(value_temp(:))) = 0;
+            value_temp_bw = value_temp; 
+            % ignore pixels outside of bounding box defined by X Y
+            BB = ones(size(value_temp_bw));
+            BB (round(X(1)/stepX):round(X(2)/stepX),round(Y(1)/stepX):round(Y(3)/stepX),:)=0;
+            value_temp_bw(logical(BB)) = 0;
+            value_temp_bw(value_temp<0.1*max(value_temp(:))) = 0;
             
             CC = bwconncomp(value_temp_bw);
             PeakNum = CC.NumObjects;

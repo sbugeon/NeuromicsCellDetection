@@ -9,7 +9,7 @@ function [pt_list,pt_area] = addDelCells2(h,pt_list,pt_area)
 ht = get(h,'Title');
 titleString = ht.String;
 title(h,[titleString,' || Deleting Cells...']);
-
+set(gcf,'units','normalized','outerposition',[0 0 1 1])
 [pts_x,pts_y] = getpts(h);
 h1 = findobj(h);
 for i = 1:length(h1)

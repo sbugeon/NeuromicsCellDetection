@@ -5,15 +5,19 @@ addpath('C:\Users\Stephane\OneDrive - University College London\Documents\MATLAB
 clear;
 close all;
 % --------- Set the data file folder -------------
-Animal_ID = 'SB034';
+Animal_ID = 'SB043';
 XStep = 1; % Specify X resolution in microns (X is medial to lateral for rigth hemisphere)
 ZStep = 1; % Specify Z resolution in microns (Z is deep to superficial)
 slice_file_source = fullfile(pwd,'2DSlice');% Specify the path for slice files storage
+
+SliceNames = dir(slice_file_source);
+SliceNames = {SliceNames.name};
 slice_positions = 1:50; % Specify order of slices
 fmt = ['C%d-',Animal_ID,'-%02d.tif']; % The format of the tif files.
 % --------- Create the information table ------------
-for i = 1:length(slice_positions)
-    FileName{i,1} = sprintf(fmt,1,i);
+for dd = 3:length(SliceNames)
+    i=dd-2;
+    FileName{i,1} = SliceNames{dd};
     Channel{i,1} = 'Red';
     [~,name_temp,~] = fileparts(FileName{i,1});
     DataName{i,1} = ['Slice_',name_temp];
@@ -47,7 +51,7 @@ load run_info.mat
 Channel = Channel_reg;
 % options for 2D cell detection
 Option_detect2.Sigma = [1 1]*2;
-Option_detect2.Res0 = 0.03;
+Option_detect2.Res0 = 0.10;
 Option_detect2.Threshold = 0;
 Option_detect2.SizeLimit = [100,10000];
 Option_detect2.MedianFilterSize = [2 ,2];
@@ -62,8 +66,8 @@ Option.TransTol = 50;
 Option.AngleTol = 4;
 Option.MaxPeakNum = 200;
 Option.SigmaRender = 15;
-
-for i = 17:18
+% gg = find(~contains(slice_files.FileName,'gad'));
+for i = 25:28
     % ------------ Set current slice --------------------
     cf = (slice_files.Channel == Channel);
     slice_files_selected = slice_files(cf==1,:);
@@ -95,8 +99,7 @@ for i = 17:18
     h = gca;
     % then manual curation, adding and deleting cells
     [pt_list_slice,pt_area_slice] = neuroReg.addDelCells2(h,pt_list_slice,pt_area_slice);
-%     pt_list_slice = [];
-%     pt_list_slice(1,:) = Coord(:,2); pt_list_slice(2,:) = Coord(:,1);
+    
     SliceInfo.FileName = SliceDataName;
     SliceInfo.RunDateTime = datestr(now);
     disp(Option);
@@ -123,11 +126,11 @@ ZStackNames = dir(filepathZ); % names of z-stack files from different session
 ZStackNames = ZStackNames(3:end);
 % Set parameters for 3D cell detection
 Option_detect3.Sigma = [1 1 1]*4; % size of gaussian filter (microns)
-Option_detect3.Res0 = 0.01; % sensitivity of cell detection
-Option_detect3.SizeLimit = [700,1500]; % size interval of cells
+Option_detect3.Res0 = 0.08; % sensitivity of cell detection
+Option_detect3.SizeLimit = [100,100000]; % size interval of cells
 Option_detect3.MedianFilterSize = [1,1,1]*2; % size of median filter
-
-for i = 5
+% GreenStackName = ZStackNames(2).name;
+for i = 1
     %---------  Load Z-stack tif file data and convert into data.mat
     ZStackFileName = ZStackNames(i).name;
     % folder where data files will be saved
@@ -142,21 +145,29 @@ for i = 5
     % Save data
     ZStackInfo.FileName = ZStackFileName;
     ZStackInfo.RunDateTime = datestr(now);
+    
+%     dataGreen_CaI = neuroReg.loadTiff(XStepZstack, ZStepZstack, fullfile(filepathZ,GreenStackName),YStepZstack); %original data
     save(fullfile(filepathZ_process,filename_output),'-v7.3','ZStackInfo','dataZ_mid','Option_detect3','pt_list_vol','pt_area_vol');
     disp(datestr(now));
     fprintf([ZStackFileName,' saved at the folder ']);
     disp(filepathZ_process);
 end
+%% manual curation
+GUI_StackCuration('G:\invivoReg\SB037\ZStack\processed\SB037_2022-07-07_1_tdTomato.tif.mat')
 %% Prepare for correlation calculation
 clear;
 load run_info.mat
 % ------------- Adjust parameters --------------
-AngleRange = [-5 5 11;-6 -4 3;-8 -6 3];% AngleRange = [Alpha_start Alpha_end Alpha_points; Beta_start...; Gamma_...]
-Option.DepthRange = [100 300]; % adjust the depth at which this slice should be
-Option.StepX = 9; % larger value will give more accurate matches, but are slower
+AngleRange = [-10 10 21;-4 -2 3;-16 -14 3];% AngleRange = [Alpha_start Alpha_end Alpha_points; Beta_start...; Gamma_...]
+% AngleRange = [-7 7 11;-8 -4 5;-8 -4 5];
+% AngleRange = [-2 2 5;-4 4 9;15 25 11];
+ScaleF_Y = 1.182;
+ScaleF_X = 1.129;
+Option.DepthRange = [200 350];
+Option.StepX = 10; % larger value will give more accurate matches, but are slower
 Option.StepD = 10;
-Option.Integ =  20; % how much to integrate pixels around the plane for the stack
-Option.CellRadius = 9;
+Option.Integ =  15; % how much to integrate pixels around the plane for the stack
+Option.CellRadius = 10;
 Option.MagicNumber = 1.5;
 Option.MaxPeakNum = 1000;
 Option.TransTol = 50;
@@ -177,25 +188,33 @@ SlicesName = slice_files_selected.DataName;
 ZStackNames = dir(filepathZ); %names of z-stack files from different session
 ZStackNames = ZStackNames(3:end);
 fprintf('Preparation ready.\n')
-% filepathZ_proc = fullfile(filepathZ_process,'Proc');% folder where to find raw tiff zstacks
+filepathZ_proc = fullfile(filepathZ_process,'Proc');% folder where to find raw tiff zstacks
 % Run the FFT correlation calculation, find best matches
 for j = 1 % loop through stacks
-    for i = 11:12% loop through sections
+    for i = 25:28 %25:28%loop through sections
         % ----- Set Path -------
         this_slice = SlicesName{i};
         this_ZStack = ZStackNames(j).name;
         this_slice_path = fullfile(pwd,this_slice);
         this_ZStack_file = fullfile(filepathZ_process,[this_ZStack,'.mat']);
-        this_ZStack_Proc_file = fullfile(filepathZ_process,[this_ZStack,'.mat_curated.mat']);
+        this_ZStack_Proc_file = fullfile(filepathZ_process,[this_ZStack,'_curated.mat']);
         ZStack_file = load(this_ZStack_file);
         Option_detect3 = ZStack_file.Option_detect3;
         dataZ_mid = ZStack_file.dataZ_mid;
         pt_area_vol = ZStack_file.pt_area_vol;
         pt_list_vol = ZStack_file.pt_list_vol;
         if isfile(this_ZStack_Proc_file)
+            clear pt_list_vol
             load(this_ZStack_Proc_file)
+%             pt_list_vol = SliceROI;
+                
+%                 pt_list_vol = pt_list_vol(:,pt_list_vol(3,:)>350);
         end
-        
+%         if i<4
+%             Option.DepthRange = [300 Inf]; % adjust the depth at which this slice should be
+%         else
+%             Option.DepthRange = [0 400]; % adjust the depth at which this slice should be
+%         end
         Slice_file = load(fullfile(this_slice_path,[this_slice,'.mat']));
         % set options
         
@@ -231,6 +250,16 @@ for j = 1 % loop through stacks
         tic
         pt_area_slice = ones(length(pt_area_slice),1)*mean(pt_area_slice);
         % rotate z-stack and find best peaks from FFT
+        
+        % rescale...
+        pt_list_vol(2,:) = pt_list_vol(2,:)*ScaleF_X;
+        pt_list_vol(1,:) = pt_list_vol(1,:)*ScaleF_Y;
+        
+        dataZ_mid.value = imresize3(dataZ_mid.value,[size(dataZ_mid.value,1)*ScaleF_Y  ...
+            size(dataZ_mid.value,2)*ScaleF_X size(dataZ_mid.value,3)]);
+        dataZ_mid.x = 1:size(dataZ_mid.value,1);
+        dataZ_mid.y = 1:size(dataZ_mid.value,2);
+        
         % cross-correlation
         TransTable = neuroReg.rotationCorr3(pt_list_slice,pt_area_slice,...
             pt_list_vol,data_slice,AngleRange,Option,Slice_file.ROI_limX,Slice_file.ROI_limY);
@@ -275,22 +304,27 @@ ZStackNames = ZStackNames(3:end);
 cf = (slice_files.Channel == Channel);
 slice_files_selected = slice_files(cf,:);
 SlicesName = slice_files_selected.DataName; % i
-
-
+filepathZ_proc = fullfile(filepathZ_process,'Proc');% folder where to find raw tiff zstacks
+ScaleF_Y = 1.182;
+ScaleF_X = 1.129;
 for j = 1% loop through stacks
-    for i = 12% loop through sections
+    for i = 25:28
+        
+        % loop through sections
 
         this_slice = SlicesName{i};
         this_ZStack = ZStackNames(j).name;
         this_slice_path = fullfile(pwd,this_slice);
         this_ZStack_file = fullfile(filepathZ_process,[this_ZStack,'.mat']);
-         this_ZStack_Proc_file = fullfile(filepathZ_process,[this_ZStack,'.mat_curated.mat']);
+        this_ZStack_Proc_file = fullfile(filepathZ_process,[this_ZStack,'_curated.mat']);
         this_result_path = fullfile(this_slice_path,[this_ZStack,'_xcc']);
         fprintf('Result in %s',this_result_path);
         filepathname = fullfile(this_result_path,'result_norm.mat');
         load(this_ZStack_file); % load zstack
         if isfile(this_ZStack_Proc_file)
             load(this_ZStack_Proc_file)
+%             pt_list_vol = SliceROI;
+%         pt_list_vol = pt_list_vol(:,pt_list_vol(3,:)>300);
         end
         
         fprintf('%s Loaded.\n',this_ZStack);
@@ -300,7 +334,7 @@ for j = 1% loop through stacks
         fprintf('Result Loaded.\n');
         
         Option.Visualization = 0; % 0 for point cloud, 1 for image overlay
-        
+%         Option.Integ=10;
         % neuroReg.VisTransform
         % Set DataSets structure to record all the raw data (and binarized slice)
         DataSets.dataZ = dataZ_mid;
@@ -313,6 +347,13 @@ for j = 1% loop through stacks
         data_slice_bw_low.value = data_slice_bw_low.value - mean(data_slice_bw_low.value(~nf))*Option.MagicNumber;
         data_slice_bw_low.value(nf) = 0;
         DataSets.data_slice_bw_low = data_slice_bw_low;
+        
+%         pt_list_vol(1:2,:) = pt_list_vol(1:2,:)*ScaleF;
+        dataZ_mid.value = imresize3(dataZ_mid.value,[size(dataZ_mid.value,1)*ScaleF_Y  ...
+            size(dataZ_mid.value,2)*ScaleF_X size(dataZ_mid.value,3)]);
+        dataZ_mid.x = 1:size(dataZ_mid.value,1);
+        dataZ_mid.y = 1:size(dataZ_mid.value,2);
+        DataSets.dataZ = dataZ_mid;
         neuroReg.VisTransform3(TransTable,DataSets,pt_list_vol,pt_list_slice,[],Option,this_result_path,'Match_found.mat');
         fprintf('VisTransform\n');
         close all hidden;
@@ -329,85 +370,8 @@ for j = 1% loop through stacks
         disp(datestr(now));
         fprintf('Mission Completed!\n*******************\n');
     end
-end
-
+end 
 %%
-
-PathForGUI = 'F:\InvivoReg\SB036\ZStack\processed\ZStack_3.tif.mat';
-
-GUI_StackCuration(PathForGUI)
-
-%%    Change ROI position
-%       - Load data
-%       - Detect cells
-%       - Manual curation
-% ================================================================
-% ------------ Load environment information -------------
-clear;
-close all
-load run_info.mat
-% ------------ Settings, filepath and options -----------
-% THRESHOLD = 0.2; %%%%%%%%%%%%%%% set threshold for thresholding red image
-Channel = Channel_reg;
-% options for 2D cell detection
-Option_detect2.Sigma = [1 1]*2;
-Option_detect2.Res0 = 0.1;
-Option_detect2.Threshold = 0;
-Option_detect2.SizeLimit = [100,10000];
-Option_detect2.MedianFilterSize = [2 ,2];
-% Set Options for BW cell detection
-Option = neuroReg.setOption(Option_detect2);
-Option.StepX = 10;
-Option.StepD = 8;
-Option.Integ = 16;
-Option.MagicNumber = 2;
-Option.CellRadius = 7;
-Option.TransTol = 50;
-Option.AngleTol = 4;
-Option.MaxPeakNum = 200;
-Option.SigmaRender = 15;
-
-for i = 4:11
-    % ------------ Set current slice --------------------
-    cf = (slice_files.Channel == Channel);
-    slice_files_selected = slice_files(cf==1,:);
-    SliceFileName = slice_files_selected.FileName{i,1};
-    SliceDataName = slice_files_selected.DataName{i,1}; % without .tif
-    filepath = fullfile(slice_files_selected.RunPath{i,1});
-    source_filePathName = fullfile(slice_file_source,SliceFileName);
-    disp([SliceFileName, ' selected.']);
-    % -------------- Load slice ----------------------
-    dataS = neuroReg.loadTiff(XStep,ZStep,source_filePathName);
-    data_slice.value = squeeze(dataS.value(:,1,:));
-    data_slice.x = dataS.x;
-    data_slice.y = dataS.z;
-    disp([SliceFileName, ' Loaded.']);
-    % preprocess_slice: Detect cells
-    % Steps:
-    % - circle an area where the match should roughly be
-    % - Click the picture to select points to be excluded.
-    % - Press enter to apply.
-    % - Click on points to add and press enter again until satisfied.
-    % - Select nothing and press enter to finish.
-     MatFilePath = fullfile(filepath,[SliceDataName,'.mat']);
-    load(MatFilePath)
-    % first outline the area where the peak should be
-    neuroReg.plotData2(data_slice);
-    title('Circle the potential area for match center...')
-    [ROI_limX , ROI_limY] = getpts();
-    
-    save(MatFilePath,'SliceInfo','data_slice',...
-        'pt_list_slice','pt_area_slice','Option','Option_detect2','ROI_limX','ROI_limY');
-    fprintf('||||||||||||||||||||||||||||||||||||||||||||\n');
-    fprintf(['Slice_',SliceDataName,' saved at the folder\n']);
-    fprintf('||||||||||||||||||||||||||||||||||||||||||||\n');
-    disp(filepath);
-    disp(datestr(now));
-    close all;
-end
-%% get average angles
-
-%% Visualisation of results, adjustement of matches and save figures
 clear
 load run_info.mat
 Channel = Channel_reg; % 'Red' for red channel, 'Green' for green channel
@@ -417,9 +381,9 @@ cf = (slice_files.Channel == Channel);
 slice_files_selected = slice_files(cf,:);
 SlicesName = slice_files_selected.DataName; % i
 filepathZ_proc = fullfile(filepathZ_process,'Proc');% folder where to find raw tiff zstacks
-AllTables = table(); SliceName={};
+AllTables = table();
 for j =1% loop through stacks
-    for i = 1:40% loop through sections
+    for i = 1:33% loop through sections
 
         this_slice = SlicesName{i};
         this_ZStack = ZStackNames(j).name;
@@ -429,12 +393,16 @@ for j =1% loop through stacks
         this_result_path = fullfile(this_slice_path,[this_ZStack,'_xcc']);
        
         % ----- Saves the match found --------
+        try
         new_filepathname = fullfile(this_result_path,'Match_found.mat');
         load(new_filepathname);
-        if~isempty(TransTable)
-        SliceName=[SliceName;this_slice(7:end)];
+        catch
+            TransTable = table();
         end
-         AllTables = [AllTables;TransTable];
+        if ~isempty(TransTable)
+        TransTable.slice =   {this_slice};
+        AllTables = [AllTables;TransTable];
+        end
+         
     end
 end
-
