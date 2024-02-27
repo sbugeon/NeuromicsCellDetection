@@ -12,7 +12,7 @@ TransTable = table2array(TransTable);
 TransParameters = TransTable(1,2:end);
 Integ = Option.Integ;
 
-Subsampling = 1;
+Subsampling = 0.4;
 dataZ = DataSets.dataZ;
 dataZ = neuroReg.subsample_data(dataZ, Subsampling);
 data_slice = DataSets.data_slice;
@@ -54,11 +54,11 @@ pt_list_vol(3,:) = pt_list_vol(3,:) - iy1;
 %%
 
 v_temp1 = data_cut1.value;
-v_temp1 = intensity_normalize(v_temp1);
+% v_temp1 = intensity_normalize(v_temp1);
 v_temp1 = flipud(v_temp1');
 
 v_temp2 = data_slice_now.value;
-v_temp2 = 2*intensity_normalize(v_temp2);
+% v_temp2 = intensity_normalize(v_temp2);
 v_temp2 = flipud(v_temp2');
 
 end
