@@ -25,7 +25,13 @@ for i = 1: size(TransParameters,1)
     M1 = [R,t];
     
     [~,~,MyNeighb,~] = neuroReg.PointCloudRegister2(pt_list_vol',pt_list_slice',M_23',d,[]);
+    try
     I = neuroReg.findCutStack(dataZ_mid,data_slice,M1);
+    catch
+        ScoreStack(i) = 0;
+        ScoreSlice(i) = 0;
+        continue;
+    end
     pt_list_vol_rotated = M1*[pt_list_vol;ones(size(pt_list_vol(1,:)))];
    
     if ~isempty(I.vert)

@@ -393,7 +393,7 @@ function [V,nr,nre]=lcon2vert(A,b,Aeq,beq,TOL,checkbounds)
                 faceVertices=lcon2vert(Amod,bmod,Aeq,beq,TOL,1);
                 if isempty(faceVertices)
                    disp 'Something''s wrong. Couldn''t find face vertices. Possibly polyhedron is unbounded.'
-                   keyboard
+%                    keyboard
                 end
 
                 c=faceVertices(1,:).';  %Take any vertex - find local recession cone vector
@@ -414,7 +414,7 @@ function [V,nr,nre]=lcon2vert(A,b,Aeq,beq,TOL,checkbounds)
 
                  if bmin>=-TOL
                    disp 'Something''s wrong. We should have found a recession vector (bb<0).'
-                   keyboard
+                   error
                  end      
 
 
@@ -427,7 +427,7 @@ function [V,nr,nre]=lcon2vert(A,b,Aeq,beq,TOL,checkbounds)
                 if size(linetips,1)<2
                    disp 'Failed to identify line segment through interior.'
                    disp 'Possibly {x: Aeq*x=beq} has weak intersection with interior({x: Ax<=b}).'
-                   keyboard
+                   error
                 end
 
 
