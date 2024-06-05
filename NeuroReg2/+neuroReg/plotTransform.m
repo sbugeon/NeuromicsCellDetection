@@ -1,4 +1,4 @@
-function plotTransform(h,TransTable,DataSets,pt_list_vol,pt_list_slice,Option,pathway,M_icp_s2v,M_icp_v2s)
+function plotTransform(h,TransTable,DataSets,pt_list_vol,pt_list_slice,Option,pathway,M_icp_s2v,M_icp_v2s,Contrast)
 % plotTransform visualize the registration from dataZ to data_slice.
 % h specifies the Figure handle to plot in.
 % TransTable is a 1-by-7 table. It can be one row from the output of
@@ -18,7 +18,7 @@ dataZ = DataSets.dataZ;
 data_slice = DataSets.data_slice;
 data_slice_bw_low = DataSets.data_slice_bw_low;
 icp_flag = 0;
-if nargin == 10
+if nargin > 7 && ~isempty(M_icp_s2v)
     icp_flag = 1;
 end
 %% Visualization for transformation
@@ -152,10 +152,10 @@ figure(h);
 h_temp=subplot(2,4,4);
 
 v_temp1 = data_cut1.value;
-v_temp1 = intensity_normalize(v_temp1);
+v_temp1 = intensity_normalize(v_temp1) * Contrast;
 v_temp1 = flipud(v_temp1');
 v_temp2 = data_slice_now.value;
-v_temp2 = intensity_normalize(v_temp2);
+v_temp2 = intensity_normalize(v_temp2) * Contrast;
 v_temp2 = flipud(v_temp2');
 
 IM_V(:,:,1) = v_temp2;
