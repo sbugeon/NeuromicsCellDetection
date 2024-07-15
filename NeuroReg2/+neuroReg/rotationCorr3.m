@@ -171,6 +171,7 @@ for i = 1:n_gamma
             PeakNum = CC.NumObjects;
             Angles = [alpha(k),beta(j),gamma(i)];
             for i_pk = 1:PeakNum
+%                 i_pk
                 % Get the Maximum intensity from each object
                 [Intensity,i_pos] = max(value_temp_bw(CC.PixelIdxList{i_pk}));
                 % Get the Maximum position from each object
@@ -178,7 +179,7 @@ for i = 1:n_gamma
                 x_c(2,1) = data_now.z(y_c_temp_d);
                 value_temp = value_temp - min(min(value_temp));
                 % keep peak if in the region of interest
-                if inpolygon(y_c_temp_x * stepX, y_c_temp_z*stepX, X,Y)
+%                 if validateMatch(y_c_temp_x * stepX,y_c_temp_z*stepX,X,Y,25,-alpha(k)) %inpolygon(y_c_temp_x * stepX, y_c_temp_z*stepX, X,Y)
                     y_c = [y_c_temp_x;0;y_c_temp_z];
                     y_c(1) = y_c(1)*stepX+data_slice_bw_low.x(1)-stepX;
                     y_c(3) = y_c(3)*stepX+data_slice_bw_low.y(1)-stepX;
@@ -212,9 +213,9 @@ for i = 1:n_gamma
                         end
                     end
                     % Peaks.Corr, Peaks.M
-                else
-                    continue
-                end
+%                 else
+%                     continue
+%                 end
             end
             % Keep peaks in the depth range
             InDepth = - TransTable.Translation(:,2)> DepthRange(1) & - TransTable.Translation(:,2)<DepthRange(2);

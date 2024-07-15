@@ -4,7 +4,7 @@ addpath('C:\Users\bugeon\Documents\MATLAB\GUI Layout Toolbox\layout') % https://
 clear
 % run every time you had new sections
 % ================================================================
-Animal_ID = 'jm028';
+Animal_ID = 'jm033';
 MainPath = ['D:\invivoReg\',Animal_ID]; % path where the registration data will be saved
 % ================================================================
 
@@ -62,8 +62,9 @@ for i = 1
     ZStackFileName = ZStackNames(i).name;
     % folder where data files will be saved
     Full_name = fullfile(filepathZ,ZStackFileName);
-    data = neuroReg.loadTiff(XStepZstack, ZStepZstack, Full_name,YStepZstack); %original data
     filename_output = [ZStackFileName,'.mat'];
+    
+    data = neuroReg.loadTiff(XStepZstack, ZStepZstack, Full_name,YStepZstack); %original data
     % --------- Detect cells 3D
     % Apply median filter
     dataZ_mid = neuroReg.medfilt3(data,Option_detect3);
@@ -78,7 +79,18 @@ for i = 1
     disp(filepathZ_process);
 end
 %% manual curation of zstack
-GUI_StackCuration(fullfile(filepathZ_process,filename_output))
+clear
+load run_info.mat
+
+ZStackNames = ZStackNames(3:end);
+for i = 1
+    %---------  Load Z-stack tif file data and convert into data.mat
+    ZStackFileName = ZStackNames(i).name;
+    filename_output = [ZStackFileName,'.mat'];
+    GUI_StackCuration(fullfile(filepathZ_process,filename_output))
+    
+%     GUI_StackCuration_light(fullfile(filepathZ_process,filename_output))
+end
 %%       Preprocess the slice data.
 %       - Load data
 %       - Detect cells
@@ -95,8 +107,8 @@ clear;
 close all
 load run_info.mat
 % ------------ Settings, filepath and options -----------
-Option_detect2.Res0 = 0.04; % threshold for the cell detection
-Slice2Run = 1:size(slice_files,1);
+Option_detect2.Res0 = 0.06; % threshold for the cell detection
+Slice2Run = 1;
 % ================================================================
 
 Channel = Channel_reg;
@@ -132,10 +144,12 @@ for i = Slice2Run % slice number
     data_slice.y = dataS.z;
     disp([SliceFileName, ' Loaded.']);
     
-    % first outline the area where the peak should be
+    % first outline the surface of the slice
     neuroReg.plotData2(data_slice);
     title('Circle the potential area for match center...')
-    [ROI_limX , ROI_limY] = getpts();
+    d = drawpolygon();
+    ROI_limX = d.Position(:,1);
+    ROI_limY = d.Position(:,2);
     
     [pt_list_slice, pt_area_slice] = neuroReg.detectCells2(data_slice,Option_detect2);
     h = gca;
@@ -167,12 +181,13 @@ GUI_CurateSliceNeuroReg(slice_files.DataName,strrep(slice_file_source,'2DSlice',
 clear;
 load run_info.mat
 
-Slice2Run = 1:size(slice_files,1);
+Slice2Run = 1;
 Stack2Run = 1;
 
 % ------------- Adjust parameters --------------
 % ================================================================
-AngleRange = [-15 15 21;-15 15 21;-15 15 21];% AngleRange = [Alpha_start Alpha_end Alpha_points; Beta_start...; Gamma_...]
+% AngleRange = [-20 -13 8;-6 0 7;-14 -10 5];% AngleRange = [Alpha_start Alpha_end Alpha_points; Beta_start...; Gamma_...]
+AngleRange = [-20 -13 8;-2 -2 1;-13 -13 1];
 % set a range for the slice position
 Option.DepthRange = [0 Inf]; % if there is any assumption on which depth this section is
 % or give it for each slice
@@ -180,8 +195,8 @@ SlicePosPath = []; % if none, set to []
 Range = 50; % tolerance range around the assumed slice position
 
 Option.StepX = 10; % smaller value will give more accurate matches, but are slower
-Option.StepD = 10; % smaller value will give more accurate matches, but are slower
-Option.Integ =  40; % how much to integrate pixels around the plane for the stack = slice thickness
+Option.StepD = 25; % smaller value will give more accurate matches, but are slower
+Option.Integ =  30; % how much to integrate pixels around the plane for the stack = slice thickness
 
 ScaleF_Y = 1; % Set to 1 usually!!!!!!!!
 ScaleF_X = 1; % Set to 1 usually!!!!!!!!
@@ -268,7 +283,6 @@ for j = Stack2Run % loop through stacks
         subplot(3,1,3);
         neuroReg.plotData2(data_slice_bw);
         saveas(h, fullfile(this_result_path,'Slice.tif'))
-        tic
         pt_area_slice = ones(length(pt_list_slice),1)*mean(pt_area_slice);
         % rotate z-stack and find best peaks from FFT
         
@@ -282,18 +296,21 @@ for j = Stack2Run % loop through stacks
         dataZ_mid.y = 1:size(dataZ_mid.value,2);
         
         % cross-correlation
+        tic
         TransTable = neuroReg.rotationCorr3(pt_list_slice,pt_area_slice,...
             pt_list_vol,data_slice,AngleRange,Option,Slice_file.ROI_limX,Slice_file.ROI_limY);
+        toc
         % find score for pt cloud registration for each peak
         [ScoreStack , ScoreSlice] = neuroReg.make_icp(TransTable,pt_list_slice, ...
-            pt_list_vol,data_slice,dataZ_mid,15);
+            pt_list_vol,data_slice,dataZ_mid,15,Option,Slice_file.ROI_limX,Slice_file.ROI_limY);
+        if ~isempty(TransTable.Intensity)
         TransTable.IntensityXCorr = mat2gray(TransTable.Intensity)+0.1;
-        TransTable.ScoreStack= mat2gray(ScoreStack)+0.1;
-        TransTable.ScoreSlice= mat2gray(ScoreSlice)+0.1;
-        TransTable.Intensity= sqrt(2*TransTable.IntensityXCorr.^2 + TransTable.ScoreStack.^2 + TransTable.ScoreSlice.^2);
-        TransTable.Intensity= TransTable.IntensityXCorr + TransTable.ScoreStack + TransTable.ScoreSlice;
+        TransTable.ScoreStack = mat2gray(ScoreStack)+0.1;
+        TransTable.ScoreSlice = mat2gray(ScoreSlice)+0.1;
+        TransTable.Intensity = sqrt(2*TransTable.IntensityXCorr.^2 + TransTable.ScoreStack.^2 + TransTable.ScoreSlice.^2);
+        TransTable.Intensity = TransTable.IntensityXCorr + TransTable.ScoreStack + TransTable.ScoreSlice;
         TransTable = sortrows(TransTable,'Intensity','descend');
-        toc
+        end
         RunInfo.EndTime = datestr(now);
         disp(RunInfo.EndTime);
         fprintf('Calculation completed.\n')
@@ -320,7 +337,7 @@ end
 clear
 load run_info.mat
 %
-Slice2Run = 1:size(slice_files,1);
+Slice2Run = 1;%1:size(slice_files,1);
 Stack2Run = 1;
 %
 Channel = Channel_reg; % 'Red' for red channel, 'Green' for green channel
@@ -356,6 +373,8 @@ for j = Stack2Run% loop through stacks
         load(filepathname); % load result
         fprintf('Result Loaded.\n');
         
+        Slice_file = load(fullfile(this_slice_path,[this_slice,'.mat']));
+         
         Option.Visualization = Visualization;
         
         % Set DataSets structure to record all the raw data (and binarized slice)
@@ -375,16 +394,19 @@ for j = Stack2Run% loop through stacks
         dataZ_mid.x = 1:size(dataZ_mid.value,1);
         dataZ_mid.y = 1:size(dataZ_mid.value,2);
         DataSets.dataZ = dataZ_mid;
+        
+        TransTable = keepGoodMatches(TransTable,Slice_file.ROI_limX,Slice_file.ROI_limY);
+        
         neuroReg.VisTransform3(TransTable,DataSets,pt_list_vol,pt_list_slice,[],Option,this_result_path,'Match_found.mat');
         fprintf('VisTransform\n');
         close all hidden;
         
-        % ----- Saves the match found --------
+        % ----- Saves the match found -----
         new_filepathname = fullfile(this_result_path,'Match_found.mat');
         load(new_filepathname);
         h = figure(10086);
         if isempty(TransTable)==0
-            neuroReg.plotTransform(h,TransTable(1,:),DataSets,pt_list_vol,pt_list_slice,Option,this_result_path);
+            neuroReg.plotTransform(h,TransTable(1,:),DataSets,pt_list_vol,pt_list_slice,Option,this_result_path,[],[],1);
         end
         fprintf('*******************\n');
         
@@ -405,7 +427,7 @@ SlicesName = slice_files_selected.DataName; % i
 filepathZ_proc = fullfile(filepathZ_process,'Proc');% folder where to find raw tiff zstacks
 AllTables = table();
 for j =1 %  loop through stacks
-    for i = [1:6,20:26,13:18]%1:length(SliceName)% loop through sections
+    for i = 1:length(SlicesName)% loop through sections
         
         this_slice = SlicesName{i};
         this_ZStack = ZStackNames(j).name;

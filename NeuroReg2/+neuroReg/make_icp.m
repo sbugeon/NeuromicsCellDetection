@@ -1,5 +1,5 @@
 
-function [ScoreStack , ScoreSlice] = make_icp(TransTable,pt_list_slice, pt_list_vol,data_slice,dataZ_mid,d)
+function [ScoreStack , ScoreSlice] = make_icp(TransTable,pt_list_slice, pt_list_vol,data_slice,dataZ_mid,d,Option,X,Y)
 % ICP based on the current transform matrix.
 % obj.icp plots and print the icp result.
 % obj.icp(d) plots and print the icp result, with the maximum
@@ -14,7 +14,7 @@ TransParameters = table2array(TransTable(:,2:end));
 ScoreStack = NaN(size(TransParameters,1),1);
 ScoreSlice = NaN(size(TransParameters,1),1);
  fprintf('\n Getting Peaks  \n')
-for i = 1: size(TransParameters,1)
+for i = 1:size(TransParameters,1)
     %% Get M2
     [~,R,~,~,~] = ...
         neuroReg.rotateCells(pt_list_vol,...
@@ -42,17 +42,22 @@ for i = 1: size(TransParameters,1)
         yq  = pt_list_slice(2,:)';
         
         pt_slice_in = inpolygon(xq,yq,xv(k),yv(k));
-        pt_vol_in = pt_list_vol_rotated(2,:)>= -d &   pt_list_vol_rotated(2,:)<= d;
+        pt_vol_in = pt_list_vol_rotated(2,:)>= -Option.Integ &   pt_list_vol_rotated(2,:)<= Option.Integ;
         
         % Score for Cells in Zstack matched
         ScoreStack(i) = (length(unique(MyNeighb))/sum(pt_vol_in)) + (length(unique(MyNeighb))^2/MaxCellMatch^2);
         % Score for Cells in Slice matched
-        ScoreSlice(i) =  length(unique(MyNeighb))/sum(pt_slice_in)+ (length(unique(MyNeighb))^2/MaxCellMatch^2);
-        
-       
+        ScoreSlice(i) =  length(unique(MyNeighb))/sum(pt_slice_in) + (length(unique(MyNeighb))^2/MaxCellMatch^2);
+              
     else
         ScoreStack(i) = 0;
         ScoreSlice(i) = 0;
     end
-    
+    AngleTolerance = 25;
+    GoodMatch = validateMatch(t(1),t(3),X,Y,AngleTolerance,-TransParameters(i,1)); 
+    if ~GoodMatch
+         ScoreStack(i) = 0;
+        ScoreSlice(i) = 0;
+        
+    end
 end

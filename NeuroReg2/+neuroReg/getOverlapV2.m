@@ -10,8 +10,11 @@ function [v_temp1,v_temp2,pt_list_vol,pt_list_slice,xb,yb] = getOverlapV2(h,Tran
 TransTable = table2array(TransTable);
 TransParameters = TransTable(1,2:end);
 Integ = Option.Integ;
-
+if isfield(Option,'Subsampling')
+  Subsampling = Option.Subsampling;  
+else
 Subsampling = 0.6;
+end
 if ~isempty(DataSets)
 dataZ = DataSets.dataZ;
 dataZ = neuroReg.subsample_data(dataZ, Subsampling);

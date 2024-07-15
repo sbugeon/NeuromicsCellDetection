@@ -213,8 +213,9 @@ classdef VisTransform3 < handle
             %%
             if obj.Option.Visualization
                 [v_temp1,v_temp2] = neuroReg.getOverlap(obj.Gui.h3,obj.Data.TransTableNow,obj.Data.DataSets,pt_list_vol,pt_list_slice,obj.Option);
-                v_temp2 = imadjust(uint16(v_temp2),[0 0.15]);
-                ImtoShow = cat(3,v_temp2,imadjust(uint16(v_temp1),[0 0.6]),uint16(v_temp2)*0);
+%                 v_temp2 = imadjust(uint16(v_temp2),[0 1]);
+%                 v_temp1 = imadjust(uint16(v_temp1),[0 0.001]);
+                ImtoShow = cat(3,uint16(v_temp2 * 2^16),uint16(v_temp1 * 2^16),uint16(v_temp2)*0);
                 if obj.Gui.Init
                     obj.Gui.ImOverlap = imshow(ImtoShow,'Parent',obj.Gui.h3);
                 else
