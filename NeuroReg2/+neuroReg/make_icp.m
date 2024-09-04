@@ -54,10 +54,10 @@ for i = 1:size(TransParameters,1)
         ScoreSlice(i) = 0;
     end
     AngleTolerance = 25;
-    GoodMatch = validateMatch(t(1),t(3),X,Y,AngleTolerance,-TransParameters(i,1)); 
-    if ~GoodMatch
-         ScoreStack(i) = 0;
-        ScoreSlice(i) = 0;
-        
-    end
+%     GoodMatch = validateMatch(t(1),t(3),X,Y,AngleTolerance,-TransParameters(i,1)); 
+%     if ~GoodMatch
+%          ScoreStack(i) = 0;
+%         ScoreSlice(i) = 0;
+%         
+%     end
 end

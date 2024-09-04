@@ -13,27 +13,35 @@ Integ = Option.Integ;
 if isfield(Option,'Subsampling')
   Subsampling = Option.Subsampling;  
 else
-Subsampling = 0.6;
+Subsampling = 1;
 end
+
 if ~isempty(DataSets)
 dataZ = DataSets.dataZ;
+if Subsampling ~=1
 dataZ = neuroReg.subsample_data(dataZ, Subsampling);
+end
 data_slice = DataSets.data_slice;
 data_slice.value = double(data_slice.value);
+if Subsampling ~=1
 data_slice=neuroReg.subsample_data(data_slice, Subsampling);
 end
+end
+
 %%
+
 [~,R,~,~,~] = ...
     neuroReg.rotateCells(pt_list_vol0,...
     TransParameters(1),TransParameters(2),TransParameters(3));
 t = TransParameters(4:6)';
 M = [R',-R'*t]; % M: slice to volume. Default.
     M1 = [R,t]; % Volume to Slice
+
 %% Plot the slice from volume
 if ~isempty(DataSets)
-tic
-[data_cut1,b_plane,~] = neuroReg.cutVolume(dataZ,data_slice,M,Integ,0,0);
-toc
+% tic
+[data_cut1,b_plane,~] = neuroReg.cutVolume(dataZ,data_slice,M,Integ,0,0,1);
+% toc
 x1 = min(b_plane(1,:));
 x2 = max(b_plane(1,:));
 y1 = min(b_plane(2,:));

@@ -186,8 +186,8 @@ Stack2Run = 1;
 
 % ------------- Adjust parameters --------------
 % ================================================================
-% AngleRange = [-20 -13 8;-6 0 7;-14 -10 5];% AngleRange = [Alpha_start Alpha_end Alpha_points; Beta_start...; Gamma_...]
-AngleRange = [-20 -13 8;-2 -2 1;-13 -13 1];
+AngleRange = [-20 -13 8;-6 0 7;-14 -10 5];% AngleRange = [Alpha_start Alpha_end Alpha_points; Beta_start...; Gamma_...]
+% AngleRange = [-20 -13 8;-2 -2 1;-13 -13 1];
 % set a range for the slice position
 Option.DepthRange = [0 Inf]; % if there is any assumption on which depth this section is
 % or give it for each slice
@@ -195,8 +195,8 @@ SlicePosPath = []; % if none, set to []
 Range = 50; % tolerance range around the assumed slice position
 
 Option.StepX = 10; % smaller value will give more accurate matches, but are slower
-Option.StepD = 25; % smaller value will give more accurate matches, but are slower
-Option.Integ =  30; % how much to integrate pixels around the plane for the stack = slice thickness
+Option.StepD = 20; % smaller value will give more accurate matches, but are slower
+Option.Integ =  25; % how much to integrate pixels around the plane for the stack = slice thickness
 
 ScaleF_Y = 1; % Set to 1 usually!!!!!!!!
 ScaleF_X = 1; % Set to 1 usually!!!!!!!!
@@ -350,7 +350,7 @@ SlicesName = slice_files_selected.DataName; % i
 ScaleF_Y = 1; % Set to 1 usually!!!!!!!!
 ScaleF_X = 1; % Set to 1 usually!!!!!!!!
 
-Visualization = 0; % 0 for point cloud, 1 for image overlay(slower)
+Visualization = 1; % 0 for point cloud, 1 for image overlay(slower)
 
 for j = Stack2Run% loop through stacks
     for i = Slice2Run% loop through sections
@@ -395,7 +395,7 @@ for j = Stack2Run% loop through stacks
         dataZ_mid.y = 1:size(dataZ_mid.value,2);
         DataSets.dataZ = dataZ_mid;
         
-        TransTable = keepGoodMatches(TransTable,Slice_file.ROI_limX,Slice_file.ROI_limY);
+%         TransTable = keepGoodMatches(TransTable,Slice_file.ROI_limX,Slice_file.ROI_limY);
         
         neuroReg.VisTransform3(TransTable,DataSets,pt_list_vol,pt_list_slice,[],Option,this_result_path,'Match_found.mat');
         fprintf('VisTransform\n');

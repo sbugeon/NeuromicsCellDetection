@@ -28,7 +28,7 @@ M = [R',-R'*t]; % M: slice to volume. Default.
     M1 = [R,t]; % Volume to Slice
 
 %% Plot the slice from volume
-[data_cut1,b_plane,~] = neuroReg.cutVolume(dataZ,data_slice,M,Integ);
+[data_cut1,b_plane,~] = neuroReg.cutVolume(dataZ,data_slice,M,Integ,0,0,1);
 %%
 x1 = min(b_plane(1,:));
 x2 = max(b_plane(1,:));

@@ -1,8 +1,9 @@
-function [data_out,b_plane,b_list_volume] = cutVolume(data,cut_grid,M,d,MeanSub,Full)
+function [data_out,b_plane,b_list_volume] = cutVolume(data,cut_grid,M,d,MeanSub,Full,Fast)
 
 if nargin<5
     MeanSub = 1;
     Full=0;
+    Fast=0;
 end
 % cutVolume cut a slice from the data.
 % data_out.x, data_out.y, data_out.value is the output slice.
@@ -64,8 +65,24 @@ elseif nargin>=4 % Integration enable
     pt_offset = offset.*n1;
     pts2 = pts1_rep + pt_offset;
     pts2 = reshape(pts2,[3,nx*ny*num_slice]);
-    v = interp3(data.y,data.x,data.z,data.value,pts2(2,:),pts2(1,:),pts2(3,:));
-    v_mat = reshape(v,[nx,ny,num_slice]);
+    if Fast
+        tic
+        v = zeros(size(pts2,2),1); pt = round(pts2)';
+%          toc
+%          tic
+        Good = pt(:,1)>0 & pt(:,1)<=size(data.value,1) & pt(:,2)>0 & pt(:,2)<=size(data.value,2) & pt(:,3)>0 & pt(:,3)<=size(data.value,3);
+%         toc
+%         tic
+        I1 = pt(Good,1);I2 = pt(Good,2);I3 = pt(Good,3);
+        sz = size(data.value);ind = sub2ind(sz,I1,I2,I3);
+%         toc
+%         tic
+        v(Good,1) = data.value(ind);
+        toc
+    else
+        v = interp3(data.y,data.x,data.z,data.value,pts2(2,:),pts2(1,:),pts2(3,:));
+    end
+     v_mat = reshape(v,[nx,ny,num_slice]);
     for i = 1:num_slice
         v_mat_this = v_mat(:,:,i);
         nf = isnan(v_mat_this); % nf: is NaN
