@@ -41,6 +41,7 @@ M = [R',-R'*t]; % M: slice to volume. Default.
 if ~isempty(DataSets)
 % tic
 [data_cut1,b_plane,~] = neuroReg.cutVolume(dataZ,data_slice,M,Integ,0,0,1);
+% [data_cut1,b_plane,~] = neuroReg.cutVolume(dataZ,data_slice,M);
 % toc
 x1 = min(b_plane(1,:));
 x2 = max(b_plane(1,:));
