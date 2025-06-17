@@ -25,7 +25,7 @@ GoodMatch = abs(A + Alpha)<AngleTol;
 
 MatchIn = inpolygon(x0,y0,[-1000 ; X ; max(X)+1000],[ -1000 ; Y ; -1000]) ;
 
-GoodMatch  = GoodMatch & ~MatchIn & S(1)<100;
+GoodMatch  = GoodMatch & ~MatchIn & S(1)<200;
 % toc
 %%
 % figure(1)

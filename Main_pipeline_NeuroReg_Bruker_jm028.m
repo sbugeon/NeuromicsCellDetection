@@ -193,7 +193,7 @@ GUI_CurateSliceNeuroReg(slice_files.DataName,strrep(slice_file_source,'2DSlice',
 clear;
 load run_info.mat
 
-Slice2Run = 1:12;
+Slice2Run = 30;
 Stack2Run = 1;
 
 % ------------- Adjust parameters --------------
@@ -345,7 +345,7 @@ end
 clear
 load run_info.mat
 %
-Slice2Run = 12;
+Slice2Run = 30;
 Stack2Run = 1;
 %
 Channel = Channel_reg; % 'Red' for red channel, 'Green' for green channel

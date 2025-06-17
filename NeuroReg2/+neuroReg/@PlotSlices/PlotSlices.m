@@ -570,7 +570,7 @@ classdef PlotSlices < handle
                     if ~isempty(obj.Planes)
                             obj.Scatter = scatter(pt_show(1,icell),pt_show(2,icell),40,colorToplot,'o');
                     else
-                        obj.Scatter = scatter(pt_show(1,:),pt_show(2,:),70,'.r');
+                        obj.Scatter = scatter(pt_show(1,:),pt_show(2,:),50,'.r');
                     end
                 else
                     
@@ -579,7 +579,7 @@ classdef PlotSlices < handle
                             obj.Scatter = scatter(pt_show(1,:),pt_show(2,:),40,colorToplot,'o');
                     else
                         delete(obj.Scatter);
-                        obj.Scatter = scatter(pt_show(1,:),pt_show(2,:),70,'.r');
+                        obj.Scatter = scatter(pt_show(1,:),pt_show(2,:),50,'.r');
                     end
                 end
                 hold(axPlot,'off')
