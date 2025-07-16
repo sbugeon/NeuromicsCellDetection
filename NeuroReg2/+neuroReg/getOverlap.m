@@ -12,7 +12,7 @@ TransTable = table2array(TransTable);
 TransParameters = TransTable(1,2:end);
 Integ = Option.Integ;
 
-Subsampling = 0.4;
+Subsampling = Option.Subsampling;
 dataZ = DataSets.dataZ;
 dataZ = neuroReg.subsample_data(dataZ, Subsampling);
 data_slice = DataSets.data_slice;
@@ -28,7 +28,7 @@ M = [R',-R'*t]; % M: slice to volume. Default.
     M1 = [R,t]; % Volume to Slice
 
 %% Plot the slice from volume
-[data_cut1,b_plane,~] = neuroReg.cutVolume(dataZ,data_slice,M,Integ,0,0,1);
+[data_cut1,b_plane,~] = neuroReg.cutVolume(dataZ,data_slice,M,Integ,0,0,0);
 %%
 x1 = min(b_plane(1,:));
 x2 = max(b_plane(1,:));
@@ -61,6 +61,10 @@ v_temp2 = data_slice_now.value;
 v_temp2 = intensity_normalize(v_temp2);
 v_temp2 = flipud(v_temp2');
 
+% dd=0;
+% figure
+% ImtoShow = cat(3,uint16(v_temp2 * 2^16),uint16(v_temp1 * 2^16),uint16(v_temp2)*0);
+% imshow(ImtoShow)
 end
 function v_out = intensity_normalize(v_in)
 v_in = v_in - min(v_in(:));

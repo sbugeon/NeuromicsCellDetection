@@ -34,9 +34,9 @@ classdef VisTransform3 < handle
             obj.Option = neuroReg.setOption(Option);
             data_slice = obj.Data.DataSets.data_slice;
             data_slice.value=data_slice.value;
-            obj.Data.DataSets.data_slice_low = ...
-                neuroReg.downSample(data_slice,4,[],4);
-            % obj.Data.DataSets.data_slice_low = data_slice;
+%             obj.Data.DataSets.data_slice_low = ...
+%                 neuroReg.downSample(data_slice,3,[],3);
+            obj.Data.DataSets.data_slice_low = data_slice;
             obj.Gui.Path = filepath;
             obj.Gui.FN = fileName;
             obj.Data.Contrast = 1;

@@ -361,8 +361,14 @@ end
 clear
 load run_info.mat
 %
-Slice2Run = 1:13;
+Slice2Run = 1:size(slice_files,1);
 Stack2Run = 1;
+% parameters to subset matches using brain surface:
+AngleTolSurf = 40; % maximum angle (degrees) difference between stack surface and brain surface on the slice
+DistTolSurf = 100; % maximum distance (microns) difference between stack surface and brain surface on the slice
+% visualisation parameters 
+Visualization = 0; % 0 for point cloud, 1 for image overlay(slower)
+Subsampling = 0.5; % subsampling of image for visualization of overlay
 %
 Channel = Channel_reg; % 'Red' for red channel, 'Green' for green channel
 ZStackNames = dir(filepathZ); %names of z-stack files from different session
@@ -373,8 +379,6 @@ SlicesName = slice_files_selected.DataName; % i
 
 ScaleF_Y = 1; % Set to 1 usually!!!!!!!!
 ScaleF_X = 1; % Set to 1 usually!!!!!!!!
-
-Visualization = 0; % 0 for point cloud, 1 for image overlay(slower)
 
 for j = Stack2Run% loop through stacks
     for i = Slice2Run% loop through sections
@@ -404,6 +408,7 @@ for j = Stack2Run% loop through stacks
          end
         
         Option.Visualization = Visualization;
+        Option.Subsampling = Subsampling; % subsampling of image for visualization of overlay
         
         % Set DataSets structure to record all the raw data (and binarized slice)
         DataSets.dataZ = dataZ_mid;
@@ -423,7 +428,7 @@ for j = Stack2Run% loop through stacks
         dataZ_mid.y = 1:size(dataZ_mid.value,2);
         DataSets.dataZ = dataZ_mid;
         
-        TransTable = keepGoodMatches(TransTable,ROI_limX,ROI_limY);
+        TransTable = keepGoodMatches(TransTable,ROI_limX,ROI_limY,DataSets,pt_list_vol,AngleTolSurf,DistTolSurf);
         
         neuroReg.VisTransform3(TransTable,DataSets,pt_list_vol,pt_list_slice,[],Option,this_result_path,'Match_found.mat');
         fprintf('VisTransform\n');
