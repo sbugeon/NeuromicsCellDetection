@@ -1,4 +1,4 @@
-function TransTable = keepGoodMatches(TransTable,X,Y,DataSets,pt_list_vol,AngleTolerance,DistTolerance)
+function [TransTable,GoodMatch] = keepGoodMatches(TransTable,X,Y,DataSets,pt_list_vol,AngleTolerance,DistTolerance)
 dataZ = DataSets.dataZ;
 data_slice = DataSets.data_slice;
 
@@ -24,6 +24,8 @@ for i = 1:size(TransParameters,1)%54
 end
 toc
 fprintf('\n Done')
-TransTable.Intensity(logical(GoodMatch)) = TransTable.Intensity(logical(GoodMatch)) + 1000;
-TransTable = [TransTable(logical(GoodMatch),:);TransTable(~logical(GoodMatch),:)];
+TransTable.Intensity(logical(GoodMatch)) = TransTable.Intensity(logical(GoodMatch)) + 10;
+% TransTable = [TransTable(logical(GoodMatch),:);TransTable(~logical(GoodMatch),:)];
+[~,S] = sort(TransTable.Intensity,'descend');
+TransTable = TransTable(S,:);
 end

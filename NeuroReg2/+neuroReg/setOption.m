@@ -69,6 +69,10 @@ if ~isfield(Option,'SliceprocIdx')
     Option.SliceprocIdx = 1;
 end
 
+if ~isfield(Option,'Subsampling')
+    Option.Subsampling = 1;
+end
+
 % 1 for neg values on stack img, 0 for neg values on slice img
 if ~isfield(Option,'MismatchPen')
     Option.MismatchPen = 1; 
