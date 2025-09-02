@@ -360,10 +360,9 @@ load run_info.mat
 %
 Slice2Run = 1:size(slice_files,1);
 Stack2Run = 1;
-% parameters to subset matches, in case the zstack surface has not been
-% detected using neuroReg.getbrainsurfaceZstack
-AngleTolSurf = 40; % maximum angle (degrees) difference between stack surface and brain surface on the slice
-DistTolSurf = 200; % maximum distance (microns) difference between stack surface and brain surface on the slice
+% parameters to subset matches
+AngleTolSurf = 5; % maximum angle (degrees) difference between stack surface and brain surface on the slice
+DistTolSurf = 100; % maximum distance (microns) difference between stack surface and brain surface on the slice
 AngleCorrection = 0; % fixed angle correction of the stack surface
 
 % visualisation parameters 
