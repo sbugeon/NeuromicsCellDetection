@@ -1,4 +1,4 @@
-function b_plane = cutVolumeBorder(data,cut_grid,M)
+function b_plane = cutVolumeBorder(data,cut_grid,M,output_points)
 
 
 % cutVolumeBorder cut a slice from the data and find the border of the cut 
@@ -18,9 +18,10 @@ function b_plane = cutVolumeBorder(data,cut_grid,M)
 yy0 = zeros(size(xx0));
 pts0 = [xx0(:),yy0(:),zz0(:),ones(size(yy0(:)))]';
 
+ptsSurf = [output_points(:,1),output_points(:,2),output_points(:,3),ones(size(output_points,1),1)]';
 % Transformation
 pts1 = M*pts0;
-
+pts1Surf = M*ptsSurf;
 xx1 = pts1(1,:);
 yy1 = pts1(2,:);
 zz1 = pts1(3,:);
@@ -40,3 +41,8 @@ b_plane = [X0',Z0'];
 
 end
 
+
+figure
+scatter3(pts1(1,:),pts1(2,:),pts1(3,:))
+hold on
+scatter3(pts1Surf(1,:),pts1Surf(2,:),pts1Surf(3,:))

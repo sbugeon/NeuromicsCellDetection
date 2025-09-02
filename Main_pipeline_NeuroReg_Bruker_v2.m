@@ -188,7 +188,7 @@ Slice2Run = 39;%1:size(slice_files,1);
 Stack2Run = 1;
 
 % ------------- Adjust parameters --------------
-AngleRange = [-10 0 11;-10 0 11;-10 0 11]; % AngleRange = [Alpha_start Alpha_end Alpha_points; Beta_start...; Gamma_...]
+AngleRange =  [-15 15 31;-20 20 41;-20 20 41]; % AngleRange = [Alpha_start Alpha_end Alpha_points; Beta_start...; Gamma_...]
 % set a range for the slice position
 Option.DepthRange = [0 Inf]; % if there is any assumption on which depth this section is
 % or give it for each slice
@@ -202,7 +202,7 @@ Option.Integ =  16; % how much to integrate pixels around the plane for the stac
 ScaleF_Y = 1; % Set to 1 usually!!!!!!!!
 ScaleF_X = 1; % Set to 1 usually!!!!!!!!
 % ================================================================
-Option.CellRadius = 8;
+Option.CellRadius = 9;
 Option.MagicNumber = 1.5;
 Option.MaxPeakNum = 2000;
 Option.TransTol = 100;%50;
@@ -332,17 +332,42 @@ for j = Stack2Run % loop through stacks
     end
 end
 
+%% find zstack surface to get it parallel to slice surface
+
+clear
+load run_info.mat
+%
+Stack2Run = 2;
+Channel = Channel_reg; % 'Red' for red channel, 'Green' for green channel
+ZStackNames = dir(filepathZ); %names of z-stack files from different session
+ZStackNames = ZStackNames(3:end);
+Treshold = 0.05; % this threshold needs to be manually adjusted for different zstacks
+
+for j = Stack2Run% loop through stacks
+    this_ZStack = ZStackNames(j).name;
+    this_ZStack_file = fullfile(filepathZ_process,[this_ZStack,'.mat']);
+    this_ZStack_Proc_file = fullfile(filepathZ_process,[this_ZStack,'_curated.mat']);
+    load(this_ZStack_file); % load zstack
+    
+    % this function will detect the zstack surface using a fixed threshold
+    output_points = neuroReg.getbrainsurfaceZstack(dataZ_mid,0.05);
+    save(fullfile(filepathZ_process,[this_ZStack,'_surface.mat']),'output_points')
+end
+
 %% Visualisation of results, adjustement of matches and save figures
 clear
 load run_info.mat
 %
-Slice2Run = 39;
+Slice2Run = 1:size(slice_files,1);
 Stack2Run = 1;
-% parameters to subset matches using brain surface:
+% parameters to subset matches, in case the zstack surface has not been
+% detected using neuroReg.getbrainsurfaceZstack
 AngleTolSurf = 40; % maximum angle (degrees) difference between stack surface and brain surface on the slice
-DistTolSurf = 100; % maximum distance (microns) difference between stack surface and brain surface on the slice
+DistTolSurf = 200; % maximum distance (microns) difference between stack surface and brain surface on the slice
+AngleCorrection = 0; % fixed angle correction of the stack surface
+
 % visualisation parameters 
-Visualization = 1; % 0 for point cloud, 1 for image overlay(slower)
+Visualization = 0; % 0 for point cloud, 1 for image overlay(slower)
 Subsampling = 0.5; % subsampling of image for visualization of overlay
 
 %
@@ -357,36 +382,43 @@ SlicesName = slice_files_selected.DataName; % i
 ScaleF_Y = 1; % Set to 1 usually!!!!!!!!
 ScaleF_X = 1; % Set to 1 usually!!!!!!!!
 
-
 for j = Stack2Run% loop through stacks
+    this_ZStack = ZStackNames(j).name;
+    this_ZStack_file = fullfile(filepathZ_process,[this_ZStack,'.mat']);
+    this_ZStack_Proc_file = fullfile(filepathZ_process,[this_ZStack,'_curated.mat']);
+    load(this_ZStack_file); % load zstack
+    if isfile(this_ZStack_Proc_file)
+        load(this_ZStack_Proc_file)
+    end
+    try
+        load(fullfile(filepathZ_process,[this_ZStack,'_surface.mat']))
+    catch
+        fprintf('\n No zstack surface found, using fixed threshold')
+    end
     for i = Slice2Run% loop through sections
         this_slice = SlicesName{i};
-        this_ZStack = ZStackNames(j).name;
+        
         this_slice_path = fullfile(pwd,this_slice);
-        this_ZStack_file = fullfile(filepathZ_process,[this_ZStack,'.mat']);
-        this_ZStack_Proc_file = fullfile(filepathZ_process,[this_ZStack,'_curated.mat']);
+        
         this_result_path = fullfile(this_slice_path,[this_ZStack,'_xcc']);
         fprintf('Result in %s',this_result_path);
         filepathname = fullfile(this_result_path,'result_norm.mat');
-        load(this_ZStack_file); % load zstack
-        if isfile(this_ZStack_Proc_file)
-            load(this_ZStack_Proc_file)
-        end
 
         fprintf('%s Loaded.\n',this_ZStack);
         load(fullfile(this_slice_path,[this_slice,'.mat'])); % load slice
         fprintf('%s Loaded.\n',this_slice);
         load(filepathname); % load result
         fprintf('Result Loaded.\n');
-
-        try
-            load(fullfile(this_slice_path,[this_slice,'_curated.mat']));
+        
+         try
+           load(fullfile(this_slice_path,[this_slice,'_curated.mat'])); 
         catch
             fprintf('\n no curation')
-        end
-
+         end
+        
         Option.Visualization = Visualization;
         Option.Subsampling = Subsampling; % subsampling of image for visualization of overlay
+        
         % Set DataSets structure to record all the raw data (and binarized slice)
         DataSets.dataZ = dataZ_mid;
         DataSets.data_slice = data_slice;
@@ -404,13 +436,13 @@ for j = Stack2Run% loop through stacks
         dataZ_mid.x = 1:size(dataZ_mid.value,1);
         dataZ_mid.y = 1:size(dataZ_mid.value,2);
         DataSets.dataZ = dataZ_mid;
-
-        TransTable = keepGoodMatches(TransTable,ROI_limX,ROI_limY,DataSets,pt_list_vol,AngleTolSurf,DistTolSurf);
-
+        
+        [TransTable,GoodMatch] = keepGoodMatches(TransTable,ROI_limX,ROI_limY,DataSets,pt_list_vol,AngleTolSurf,DistTolSurf,AngleCorrection,output_points);
+        
         neuroReg.VisTransform3(TransTable,DataSets,pt_list_vol,pt_list_slice,[],Option,this_result_path,'Match_found.mat');
         fprintf('VisTransform\n');
         close all hidden;
-
+        
         % ----- Saves the match found --------
         new_filepathname = fullfile(this_result_path,'Match_found.mat');
         load(new_filepathname);
@@ -419,11 +451,11 @@ for j = Stack2Run% loop through stacks
             neuroReg.plotTransform(h,TransTable(1,:),DataSets,pt_list_vol,pt_list_slice,Option,this_result_path,[],[],1);
         end
         fprintf('*******************\n');
-
+        
         disp(datestr(now));
         fprintf('Mission Completed!\n*******************\n');
     end
-end
+end 
 close all
 %% recover all angles and translation for good matches
 clear
@@ -437,7 +469,7 @@ SlicesName = slice_files_selected.DataName; % i
 filepathZ_proc = fullfile(filepathZ_process,'Proc');% folder where to find raw tiff zstacks
 AllTables = table();
 for j =1 %  loop through stacks
-    for i = [1:6,20:26,13:18]%1:length(SliceName)% loop through sections
+    for i = 1:length(SlicesName)% loop through sections
 
         this_slice = SlicesName{i};
         this_ZStack = ZStackNames(j).name;
