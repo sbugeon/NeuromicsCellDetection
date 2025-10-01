@@ -23,6 +23,10 @@ for i = 1:size(TransParameters,1)%54
     gg = abs(surf_stack(2,:))<20;
     surf_stack = surf_stack(:,gg);
     b_plane=[];
+    if size(surf_stack,2)<3
+        b_plane = neuroReg.cutVolumeBorder(dataZ,data_slice,M);
+        surf_stack =[];
+    end
     else % using zstack boundaries
         b_plane = neuroReg.cutVolumeBorder(dataZ,data_slice,M);
         surf_stack =[];

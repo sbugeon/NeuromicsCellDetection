@@ -179,9 +179,8 @@ end
 function v_out = intensity_normalize(v_in)
 v_in = v_in - min(v_in(:));
 v_in(isnan(v_in))=0;
-% v_out(v_out<0)=0;
-% v_out = v_out/max(v_out(:));
 v_out = v_in/max(v_in(:));
+v_out = double(v_out);
 end
 function vts = getCube ( origin, size )
 x=([0 1 1 0 0 0;1 1 0 0 1 1;1 1 0 0 1 1;0 1 1 0 0 0]-0.5)*size(1)+origin(1)+size(1)/2;

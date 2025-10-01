@@ -165,7 +165,6 @@ for i = 1:n_gamma
             % coordinate sytem.
             value_temp_bw = value_temp;           
             value_temp_bw(value_temp<0.5*max(value_temp(:))) = 0;
-            value_temp_bw(value_temp<0.5*max(value_temp(:))) = 0;
             
             CC = bwconncomp(value_temp_bw);
             PeakNum = CC.NumObjects;
@@ -177,7 +176,7 @@ for i = 1:n_gamma
                 % Get the Maximum position from each object
                 [y_c_temp_x,y_c_temp_z,y_c_temp_d] = ind2sub(CC.ImageSize,CC.PixelIdxList{i_pk}(i_pos));
                 x_c(2,1) = data_now.z(y_c_temp_d);
-                value_temp = value_temp - min(min(value_temp));
+%                 value_temp = value_temp - min(min(value_temp));
                 % keep peak if in the region of interest
 %                 if validateMatch(y_c_temp_x * stepX,y_c_temp_z*stepX,X,Y,25,-alpha(k)) %inpolygon(y_c_temp_x * stepX, y_c_temp_z*stepX, X,Y)
                     y_c = [y_c_temp_x;0;y_c_temp_z];

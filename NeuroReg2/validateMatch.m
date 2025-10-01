@@ -7,7 +7,7 @@ Y = Y(ia);
 xq = [X(1):100:X(end)];
 vq = interp1(X,Y,xq);
 
-if isempty(surf_stack)
+if isempty(surf_stack) 
 [pgx,pgy] = minboundparallelogram(b_plane(:,1),b_plane(:,2));
 pgxU = pgx(1:4);
 pgyU = pgy(1:4);

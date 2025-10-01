@@ -5,7 +5,7 @@ addpath(genpath('C:\Users\bugeon\Documents\GitHub\npy-matlab-master'))
 %% create folders for this animal
 clear
 % run every time you had new sections
-Animal_ID = 'SBI008';
+Animal_ID = 'SBI007';
 MainPath = ['I:\',Animal_ID]; % path where the registration data will be saved
 
 mkdir(fullfile(MainPath,'2DSlice')) % folder where to put the slice images
@@ -208,27 +208,28 @@ GUI_CurateSliceNeuroReg(slice_files.DataName,strrep(slice_file_source,'2DSlice',
 clear;
 load run_info.mat
 
-Slice2Run = [18:21,34:38];%7:17;
+Slice2Run = 17:19;%7:17;
 % Slice2Run = [11:13,17:20];
 Stack2Run = 2;
 
 % ------------- Adjust parameters --------------
-AngleRange = [-15 15 31;-20 20 41;-20 20 41];% AngleRange = [Alpha_start Alpha_end Alpha_points; Beta_start...; Gamma_...]
+% AngleRange = [-5 15 21;2 2 1;-12 -12 1];% AngleRange = [Alpha_start Alpha_end Alpha_points; Beta_start...; Gamma_...]
+AngleRange = [-15 15 31;-15 15 31;-15 15 31];% AngleRange = [Alpha_start Alpha_end Alpha_points; Beta_start...; Gamma_...]
 % set a range for the slice position
 Option.DepthRange = [0 Inf]; % if there is any assumption on which depth this section is
 % or give it for each slice
 SlicePosPath = []; % if none, set to []
 Range = 50; % tolerance range around the assumed slice position
 
-Option.StepX = 9; % smaller value will give more accurate matches, but are slower
+Option.StepX = 10; % smaller value will give more accurate matches, but are slower
 Option.StepD = 10; % smaller value will give more accurate matches, but are slower
-Option.Integ =  15; % how much to integrate pixels around the plane for the stack = slice thickness
+Option.Integ =  10; % how much to integrate pixels around the plane for the stack = slice thickness
 
 ScaleF_Y = 1; % Set to 1 usually!!!!!!!!
 ScaleF_X = 1; % Set to 1 usually!!!!!!!!
 
 % ================================================================
-Option.CellRadius = 9;
+Option.CellRadius = 8;
 Option.MagicNumber = 1.5;
 Option.MaxPeakNum = 1000;
 Option.TransTol = 100;%50;
@@ -381,7 +382,7 @@ end
 clear
 load run_info.mat
 %
-Slice2Run = 22:24;%1:size(slice_files,1);
+Slice2Run = 17:19;%1:size(slice_files,1);
 Stack2Run = 2;
 % parameters to subset matches using brain surface:
 AngleTolSurf = 7; % maximum angle (degrees) difference between stack surface and brain surface on the slice
@@ -483,8 +484,8 @@ slice_files_selected = slice_files(cf,:);
 SlicesName = slice_files_selected.DataName; % i
 filepathZ_proc = fullfile(filepathZ_process,'Proc');% folder where to find raw tiff zstacks
 AllTables = table();
-for j =1 %  loop through stacks
-    for i = [1:6,20:26,13:18]%1:length(SliceName)% loop through sections
+for j =2 %  loop through stacks
+    for i = 22:33%1:length(SliceName)% loop through sections
 
         this_slice = SlicesName{i};
         this_ZStack = ZStackNames(j).name;
