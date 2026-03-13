@@ -5,7 +5,7 @@ addpath(genpath('C:\Users\bugeon\Documents\GitHub\npy-matlab-master'))
 %% create folders for this animal
 clear
 % run every time you had new sections
-Animal_ID = 'SBI007';
+Animal_ID = 'SBI008';
 MainPath = ['I:\',Animal_ID]; % path where the registration data will be saved
 
 mkdir(fullfile(MainPath,'2DSlice')) % folder where to put the slice images
@@ -382,7 +382,7 @@ end
 clear
 load run_info.mat
 %
-Slice2Run = 17:19;%1:size(slice_files,1);
+Slice2Run = 8:12;% [13:18,24:29];%1:size(slice_files,1);
 Stack2Run = 2;
 % parameters to subset matches using brain surface:
 AngleTolSurf = 7; % maximum angle (degrees) difference between stack surface and brain surface on the slice

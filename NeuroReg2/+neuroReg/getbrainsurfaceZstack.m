@@ -33,8 +33,8 @@ end
 % --- Plane Fitting and Grid Sampling Script ---
 % --- Configuration ---
 % Define the number of points you want in your final output grid.
-GRID_POINTS_X = 20; % Number of points along the X-axis of the new grid
-GRID_POINTS_Y = 20; % Number of points along the Y-axis of the new grid
+GRID_POINTS_X = 100; % Number of points along the X-axis of the new grid
+GRID_POINTS_Y = 100; % Number of points along the Y-axis of the new grid
 
 % --- 1. Prepare Data for Plane Fitting ---
 % First, create the X and Y coordinate grids corresponding to 'surface0'.

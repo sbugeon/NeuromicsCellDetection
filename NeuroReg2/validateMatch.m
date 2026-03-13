@@ -41,7 +41,7 @@ GoodMatch  =  GoodMatch & S(1)<DistTol;
 
 
 %%
-
+% if GoodMatch
 % figure(2)
 % clf
 % scatter(X,Y)
@@ -55,3 +55,4 @@ GoodMatch  =  GoodMatch & S(1)<DistTol;
 % title([ num2str(GoodMatch), ' ',num2str(Angle), ' ',num2str(S(1))])
 % axis equal
 % pause
+% end

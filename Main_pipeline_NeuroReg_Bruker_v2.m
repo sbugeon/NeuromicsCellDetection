@@ -184,11 +184,11 @@ GUI_CurateSliceNeuroReg(slice_files.DataName,strrep(slice_file_source,'2DSlice',
 clear;
 load run_info.mat
 
-Slice2Run = 39;%1:size(slice_files,1);
+Slice2Run = 36;%1:size(slice_files,1);
 Stack2Run = 1;
 
 % ------------- Adjust parameters --------------
-AngleRange =  [-15 15 31;-20 20 41;-20 20 41]; % AngleRange = [Alpha_start Alpha_end Alpha_points; Beta_start...; Gamma_...]
+AngleRange = [-5 5 11;-5 5 11;-20 -10 11];% AngleRange = [Alpha_start Alpha_end Alpha_points; Beta_start...; Gamma_...]
 % set a range for the slice position
 Option.DepthRange = [0 Inf]; % if there is any assumption on which depth this section is
 % or give it for each slice
@@ -436,7 +436,7 @@ for j = Stack2Run% loop through stacks
         dataZ_mid.y = 1:size(dataZ_mid.value,2);
         DataSets.dataZ = dataZ_mid;
         
-        [TransTable,GoodMatch] = keepGoodMatches(TransTable,ROI_limX,ROI_limY,DataSets,pt_list_vol,AngleTolSurf,DistTolSurf,AngleCorrection,output_points);
+%         [TransTable,GoodMatch] = keepGoodMatches(TransTable,ROI_limX,ROI_limY,DataSets,pt_list_vol,AngleTolSurf,DistTolSurf,AngleCorrection,output_points);
         
         neuroReg.VisTransform3(TransTable,DataSets,pt_list_vol,pt_list_slice,[],Option,this_result_path,'Match_found.mat');
         fprintf('VisTransform\n');

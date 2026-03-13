@@ -94,7 +94,7 @@ close all
 load run_info.mat
 % ------------ Settings, filepath and options -----------
 Option_detect2.Res0 = 0.10; % threshold for the cell detection
-Slice2Run = 17:20;
+Slice2Run = 36;
 % ================================================================
 Channel = Channel_reg;
 % options for 2D cell detection
@@ -157,11 +157,11 @@ end
 clear;
 load run_info.mat
 
-Slice2Run = 17:20;
+Slice2Run = 36;
 Stack2Run = 1;
 
 % ------------- Adjust parameters --------------
-AngleRange = [-10 10 21;-4 -2 3;-16 -14 3];% AngleRange = [Alpha_start Alpha_end Alpha_points; Beta_start...; Gamma_...]
+AngleRange = [-5 5 11;-5 5 11;-10 -20 11];% AngleRange = [Alpha_start Alpha_end Alpha_points; Beta_start...; Gamma_...]
 % set a range for the slice position
 Option.DepthRange = [100 200]; % if there is any assumption on which depth this section is
 % or give it for each slice
@@ -172,8 +172,8 @@ Option.StepX = 10; % smaller value will give more accurate matches, but are slow
 Option.StepD = 10; % smaller value will give more accurate matches, but are slower
 Option.Integ =  15; % how much to integrate pixels around the plane for the stack = slice thickness
 
-ScaleF_Y = 1.182; % Set to 1 usually!!!!!!!!
-ScaleF_X = 1.129; % Set to 1 usually!!!!!!!!
+ScaleF_Y = 1; % Set to 1 usually!!!!!!!!
+ScaleF_X = 1; % Set to 1 usually!!!!!!!!
 
 % ================================================================
 Option.CellRadius = 10;
