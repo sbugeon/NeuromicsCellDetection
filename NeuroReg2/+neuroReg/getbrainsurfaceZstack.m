@@ -94,8 +94,8 @@ disp('Preview of the first 5 points:');
 disp(output_points(1:5, :));
 
 % --- 5. (Optional) Visualize the Result ---
-disp('Creating visualization...');
-figure;
+disp('Creating 3D visualization...');
+figure('Name', '3D Surface Visualization');
 hold on; % Allow multiple plots in the same figure
 
 % Plot the original surface data as a mesh
@@ -121,3 +121,55 @@ grid on;
 axis tight;
 view(3); % Set to 3D view
 hold off;
+
+
+% --- 6. (Optional) Diagnostic Side-View Plots ---
+disp('Creating diagnostic side-view plots...');
+
+% Select the number of slices to view (e.g., 3 evenly spaced cross-sections along the Y-axis)
+num_slices = 3;
+y_slices = round(linspace(1, size(dd, 1), num_slices + 2));
+y_slices = y_slices(2:end-1); % Discard boundaries to inspect interior regions
+
+figure('Name', 'Diagnostic Side Views (XZ Plane)','Position',[ 1000         100         560        1238]);
+colormap('gray'); % Set default colormap for the raw intensity stack slices
+
+for i = 1:num_slices
+    y_idx = y_slices(i);
+    
+    % Extract the 2D cross-section (X vs Z) at this Y slice.
+    % We reshape to avoid unexpected behavior from squeeze if a dimension is 1.
+    % Transposing ensures the rows correspond to depth (Z) and columns to X-axis.
+    slice_data = reshape(dd(y_idx, :, :), [size(dd, 2), size(dd, 3)])';
+    
+    subplot(num_slices, 1, i);
+    
+    % Display the raw intensity profile
+    imagesc(x_coords, 1:size(dd, 3), slice_data);
+    caxis([0 1000])
+    hold on;
+    
+    % Calculate the fitted plane's Z value at this specific Y-slice across all X
+    Z_line = a * x_coords + b * y_idx + c;
+    
+    % Plot the fitted plane profile as a solid red line
+    h_fit_line = plot(x_coords, Z_line, 'r-', 'LineWidth', 2);
+    
+    % Plot the extracted/smoothed boundary as a dashed green line for comparison
+    h_smooth_line = plot(x_coords, surface0(y_idx, :), 'g--', 'LineWidth', 1.5);
+    
+    title(sprintf('Side View (XZ Plane) at Y = %d', y_idx));
+    xlabel('X-axis (Column Index)');
+    ylabel('Z-axis (Depth Index)');
+    
+    % Invert Y-axis so the depth index (Z) increases downwards (typical for optical stacks)
+    set(gca, 'YDir', 'reverse'); 
+    axis tight;
+    
+    if i == 1
+        legend([h_fit_line, h_smooth_line], {'Fitted Plane Line', 'Smoothed Extracted Surface'}, 'Location', 'best');
+    end
+    hold off;
+end
+
+end

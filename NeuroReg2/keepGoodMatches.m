@@ -18,20 +18,20 @@ for i = 1:size(TransParameters,1)%54
         TransParameters(i,1),TransParameters(i,2),TransParameters(i,3));
     M = [R',-R'*t]; % M: slice to volume. Default.
     if ~isempty(output_points) % using detected zstack brain surface
-    M1 = [R,t]; % Volume to Slice
-    surf_stack =  M1*[output_points,ones(size(output_points(:,1)))]';
-    gg = abs(surf_stack(2,:))<20;
-    surf_stack = surf_stack(:,gg);
-    b_plane=[];
-    if size(surf_stack,2)<3
-        b_plane = neuroReg.cutVolumeBorder(dataZ,data_slice,M);
-        surf_stack =[];
-    end
+        M1 = [R,t]; % Volume to Slice
+        surf_stack =  M1*[output_points,ones(size(output_points(:,1)))]';
+        gg = abs(surf_stack(2,:))<20;
+        surf_stack = surf_stack(:,gg);
+        b_plane=[];
+        if size(surf_stack,2)<3
+            b_plane = neuroReg.cutVolumeBorder(dataZ,data_slice,M);
+            surf_stack =[];
+        end
     else % using zstack boundaries
         b_plane = neuroReg.cutVolumeBorder(dataZ,data_slice,M);
         surf_stack =[];
     end
-    if isempty(b_plane) & isempty(surf_stack) % case where stack surface is not in match 
+    if isempty(b_plane) & isempty(surf_stack) % case where stack surface is not in match
         b_plane = neuroReg.cutVolumeBorder(dataZ,data_slice,M);
     end
     GoodMatch(i) = validateMatch(b_plane,X,Y,AngleTolerance,-TransParameters(i,1),DistTolerance,AngleCorrection,surf_stack);

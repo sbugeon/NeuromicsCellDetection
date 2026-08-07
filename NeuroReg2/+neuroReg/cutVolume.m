@@ -65,7 +65,7 @@ elseif nargin>=4 % Integration enable
     pt_offset = offset.*n1;
     pts2 = pts1_rep + pt_offset;
     pts2 = reshape(pts2,[3,nx*ny*num_slice]);
-    if Fast
+%     if Fast
         tic
         v = zeros(size(pts2,2),1); pt = round(pts2)';
 %          toc
@@ -79,9 +79,9 @@ elseif nargin>=4 % Integration enable
 %         tic
         v(Good,1) = data.value(ind);
         toc
-    else
-        v = interp3(data.y,data.x,data.z,data.value,pts2(2,:),pts2(1,:),pts2(3,:));
-    end
+%     else
+%         v = interp3(data.y,data.x,data.z,data.value,pts2(2,:),pts2(1,:),pts2(3,:));
+%     end
      v_mat = reshape(v,[nx,ny,num_slice]);
     for i = 1:num_slice
         v_mat_this = v_mat(:,:,i);

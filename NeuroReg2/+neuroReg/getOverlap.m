@@ -14,10 +14,10 @@ Integ = Option.Integ;
 
 Subsampling = Option.Subsampling;
 dataZ = DataSets.dataZ;
-dataZ = neuroReg.subsample_data(dataZ, Subsampling);
+% dataZ = neuroReg.subsample_data(dataZ, Subsampling);
 data_slice = DataSets.data_slice;
 data_slice.value = double(data_slice.value);
-data_slice=neuroReg.subsample_data(data_slice, Subsampling);
+% data_slice=neuroReg.subsample_data(data_slice, Subsampling);
 
 %%
 [~,R,~,~,~] = ...
@@ -28,7 +28,7 @@ M = [R',-R'*t]; % M: slice to volume. Default.
     M1 = [R,t]; % Volume to Slice
 
 %% Plot the slice from volume
-[data_cut1,b_plane,~] = neuroReg.cutVolume(dataZ,data_slice,M,Integ,0,0,0);
+[data_cut1,b_plane,~] = neuroReg.cutVolume(dataZ,data_slice,M,Integ);
 %%
 x1 = min(b_plane(1,:));
 x2 = max(b_plane(1,:));
